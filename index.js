@@ -3,7 +3,13 @@ const app = express();
 const port = process.env.PORT || 8080;
 const http = require('http').createServer(app);
 const uuid = require('uuid');
-const io = require('socket.io')(http);
+// socket.io 2.4.0+ blocks any handshake that carries an Origin header unless the
+// origin is whitelisted. Browsers always send Origin, so the default `origins: []`
+// makes every room/collaboration connection fail with 403 "Forbidden".
+// Accept all origins so same-origin local access (and hosted use) works.
+const io = require('socket.io')(http, {
+  origins: (origin, callback) => callback(null, true),
+});
 
 const maxRooms = process.env.MAX_ROOMS || 10;
 
